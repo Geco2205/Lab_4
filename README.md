@@ -2,25 +2,25 @@
 
 ## Comandos utilizados
 
-### Preparación del entorno
+## Preparación del entorno
 
 \`\`\`bash
 g++ --version
 
-# Si no existe:
+### Si no existe:
 sudo apt update
 sudo apt install build-essential
 
-# Herramientas de profiling
+### Herramientas de profiling
 sudo apt update
 sudo apt install linux-tools-common linux-tools-generic \
     valgrind kcachegrind google-perftools libgoogle-perftools-dev
 
-# Para el visor con GStreamer
+### Para el visor con GStreamer
 sudo apt install libgstreamer1.0-dev \
     libgstreamer-plugins-base1.0-dev
 
-# Si perf no corre, verificar versión de kernel
+### Si perf no corre, verificar versión de kernel
 uname -r
 perf --version
 \`\`\`
@@ -37,7 +37,7 @@ make
 ./point_cloud_collimation --viewer   # requiere entorno gráfico
 \`\`\`
 
-### Ejercicio A — comprensión del programa base
+## Ejercicio A — comprensión del programa base
 
 \`\`\`bash
 ./point_cloud_collimation --export
@@ -45,23 +45,23 @@ make
 
 Archivos revisados en `reconstruction/`: `target_profile.csv`, `source_initial_profile.csv`, `source_final_profile.csv`, `source_motion.csv`, `profile_metrics.csv`, `frame_*.ppm`.
 
-### Ejercicio B — perfilado con herramientas
+## Ejercicio B — perfilado con herramientas
 
 \`\`\`bash
-# perf stat: eventos generales
+### perf stat: eventos generales
 perf stat ./point_cloud_collimation
 perf stat ./point_cloud_collimation --export
 
-# perf record / report: perfil de muestreo
+### perf record / report: perfil de muestreo
 perf record -g ./point_cloud_collimation
 perf report
 
-# Valgrind Callgrind
+### Valgrind Callgrind
 valgrind --tool=callgrind ./point_cloud_collimation
 callgrind_annotate callgrind.out.* | less
 kcachegrind callgrind.out.*   # si hay entorno gráfico
 
-# Google Performance Tools: compilar enlazando libprofiler
+### Google Performance Tools: compilar enlazando libprofiler
 make clean
 make CXXFLAGS="-std=c++17 -O2 -g -Wall -Wextra -pedantic \
     -fno-omit-frame-pointer" \
@@ -74,34 +74,34 @@ CPUPROFILE=point_cloud.prof ./point_cloud_collimation
 ls -lh point_cloud.prof
 google-pprof --text ./point_cloud_collimation point_cloud.prof
 
-# Si ldd no muestra libprofiler o no se genera el .prof:
+### Si ldd no muestra libprofiler o no se genera el .prof:
 LD_PRELOAD=/lib/x86_64-linux-gnu/libprofiler.so \
     CPUPROFILE=point_cloud.prof ./point_cloud_collimation
 \`\`\`
 
-### Ejercicio C — perfilado mediante revisión de ensamblador
+## Ejercicio C — perfilado mediante revisión de ensamblador
 
 \`\`\`bash
-# Compilar conservando información de depuración
+### Compilar conservando información de depuración
 make clean
 make CXXFLAGS="-std=c++17 -O2 -g -Wall -Wextra -pedantic \
     -fno-omit-frame-pointer"
 
-# Generar ensamblador
+### Generar ensamblador
 g++ -std=c++17 -O2 -g -S -masm=intel \
     $(pkg-config --cflags gstreamer-1.0 gstreamer-app-1.0) \
     point_cloud_collimation.cpp -o point_cloud_collimation.s
 
-# Desensamblar el binario
+### Desensamblar el binario
 objdump -drwC -Mintel ./point_cloud_collimation \
     > point_cloud_collimation.objdump
 
-# Conectar muestras de perf con el ensamblador
+### Conectar muestras de perf con el ensamblador
 perf record -g ./point_cloud_collimation
 perf annotate
 \`\`\`
 
-### Ejercicio D — perfilado mediante instrumentación manual
+## Ejercicio D — perfilado mediante instrumentación manual
 
 Instrumentación agregada con `std::chrono` en al menos 5 regiones del programa
 (generación del perfil, deformación/ruido, construcción de `GridIndex`, búsqueda
@@ -119,7 +119,7 @@ std::cout << "region_x_ms=" << ms << "\n";
 Ejecución con salida en CSV (`region,iteration,milliseconds`), repitiendo varias
 corridas para promediar y reducir ruido de medición.
 
-### Ejercicio E — propuesta de optimización
+## Ejercicio E — propuesta de optimización
 
 **Cambio 1 — `cell_size` (90 → 120):**
 
@@ -137,9 +137,9 @@ perf stat ./point_cloud_collimation --export
 
 
 
-# Ejercicio E — Propuesta de Optimización (`point_cloud_collimation`)
+## Ejercicio E — Propuesta de Optimización (`point_cloud_collimation`)
 
-## Computadora usada para esta parte
+### Computadora usada para esta parte
 
 | Componente | Detalle |
 |---|---|
