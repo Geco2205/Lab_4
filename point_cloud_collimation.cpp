@@ -521,7 +521,16 @@ static IcpResult collimate_icp(const std::vector<Point> &target,
   const double convergence_threshold = VARIATION;
   const double canvas_diag = std::hypot(kCanvasWidth, kCanvasHeight);
   const double missing_distance = canvas_diag;
+
+  auto t0_grid = std::chrono::steady_clock::now();
+
   GridIndex index(target, 90.0);
+
+  auto t1_grid = std::chrono::steady_clock::now();
+
+  double grid_index_ms = std::chrono::duration<double, std::milli>(t1_grid - t0_grid).count();
+  std::cout << "grid_index_ms=" << grid_index_ms << "\n";
+
   // Initial Transformation: = initial_pca_alignment(target, source, index);
   // Disabled
   Transform2D total{};
@@ -530,8 +539,12 @@ static IcpResult collimate_icp(const std::vector<Point> &target,
   std::vector<Transform2D> transforms;
   std::vector<IterationMetrics> metrics_history;
 
+  auto t0_initial_metrics = std::chrono::steady_clock::now();
   ProfileMetrics initial_metrics =
       compare_profiles(target, current, match_threshold, missing_distance);
+  auto t1_initial_metrics = std::chrono::steady_clock::now();
+  double profile_initial_metrics_ms = std::chrono::duration<double, std::milli>(t1_initial_metrics - t0_initial_metrics).count();
+  std::cout << "initial_metrics_ms=" << profile_initial_metrics_ms << "\n";
   double previous_score = profile_score(initial_metrics);
   double score = previous_score;
   int iterations = 0;
@@ -555,6 +568,8 @@ static IcpResult collimate_icp(const std::vector<Point> &target,
     std::vector<Match> matches;
     matches.reserve(current.size());
     double distance_sum = 0.0;
+    
+    auto t0_neighbors = std::chrono::steady_clock::now();
 
     for (const Point &p : current) {
       Point nearest_point{0.0, 0.0};
@@ -565,18 +580,37 @@ static IcpResult collimate_icp(const std::vector<Point> &target,
         distance_sum += d2;
       }
     }
+    auto t1_neighbors = std::chrono::steady_clock::now();
+    double nearest_neighbors_ms = std::chrono::duration<double, std::milli>(t1_neighbors - t0_neighbors).count(); 
+    std::cout << "nearest_neighbors_ms=" << nearest_neighbors_ms << "\n";
 
     if (matches.size() < current.size() / 2) {
       throw std::runtime_error("Too few nearest-neighbor matches");
     }
 
+    auto t0_transform = std::chrono::steady_clock::now();
+
     const Transform2D delta = estimate_rigid_transform(matches);
+
+    auto t1_transform = std::chrono::steady_clock::now();
+
+    double estimate_transform_ms = std::chrono::duration<double, std::milli>(t1_transform - t0_transform).count();
+    std::cout << "estimate_transform_ms=" << estimate_transform_ms << "\n";
+
     total = compose(delta, total);
     current = apply_transform(current, delta);
     const double match_rmse =
         std::sqrt(distance_sum / static_cast<double>(matches.size()));
+    
+    auto t0_metrics = std::chrono::steady_clock::now();
+
     const ProfileMetrics metrics =
         compare_profiles(target, current, match_threshold, missing_distance);
+    
+    auto t1_metrics = std::chrono::steady_clock::now();
+    double profile_metrics_ms = std::chrono::duration<double, std::milli>(t1_metrics - t0_metrics).count();
+    std::cout << "profile_metrics_ms=" << profile_metrics_ms << "\n";
+
     score = profile_score(metrics);
 
     const double score_variation =
@@ -850,6 +884,8 @@ static void show_with_gstreamer(const std::vector<Point> &target,
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
   for (std::size_t i = 0; i < frames.size(); ++i) {
+    auto t0_gstreamer = std::chrono::steady_clock::now();
+
     std::vector<unsigned char> rgb =
         render_motion_frame(target, source, frames, i, width, height);
     GstBuffer *buffer = gst_buffer_new_allocate(nullptr, rgb.size(), nullptr);
@@ -863,6 +899,10 @@ static void show_with_gstreamer(const std::vector<Point> &target,
     GST_BUFFER_DURATION(buffer) = GST_SECOND / fps;
 
     GstFlowReturn ret = gst_app_src_push_buffer(GST_APP_SRC(appsrc), buffer);
+    auto t1_gstreamer = std::chrono::steady_clock::now();
+    double gstreamer_ms = std::chrono::duration<double, std::milli>(t1_gstreamer - t0_gstreamer).count();
+    std::cout << "gstreamer_ms=" << gstreamer_ms << "\n";
+
     if (ret != GST_FLOW_OK) {
       break;
     }
@@ -914,7 +954,17 @@ int main(int argc, char **argv) {
     const Transform2D target_to_source =
         transform_about_canvas_center(18.0 * kPi / 180.0, 620.0, -430.0);
 
+    auto t0_target = std::chrono::steady_clock::now();
     std::vector<Point> target = generate_h_rail_cloud(points_per_cloud, 7);
+
+    auto t1_target = std::chrono::steady_clock::now();
+
+    double target_generation_ms = 
+        std::chrono::duration<double, std::milli>(t1_target - t0_target).count();
+
+        std::cout << "target_generation_ms=" << target_generation_ms << "\n"; 
+
+    auto t0_source = std::chrono::steady_clock::now();
     std::vector<Point> source = apply_transform(target, target_to_source);
     const double deformation_rms =
         add_random_deformation(source, deformation_amplitude, 31);
@@ -925,6 +975,10 @@ int main(int argc, char **argv) {
       p.x = std::clamp(p.x + sensor_noise(rng), 0.0, kCanvasWidth);
       p.y = std::clamp(p.y + sensor_noise(rng), 0.0, kCanvasHeight);
     }
+    auto t1_source = std::chrono::steady_clock::now();
+    double source_generation_ms = 
+        std::chrono::duration<double, std::milli>(t1_source - t0_source).count();
+    std::cout << "source_generation_ms=" << source_generation_ms << "\n";
 
     std::cout << "Generated two H-shaped rail point clouds with "
               << points_per_cloud << " points each.\n";
@@ -949,7 +1003,11 @@ int main(int argc, char **argv) {
               << std::setprecision(8) << result.score << "\n";
 
     if (export_outputs) {
+      auto t0_export = std::chrono::steady_clock::now();
       export_reconstruction(output_dir, target, source, result);
+      auto t1_export = std::chrono::steady_clock::now();
+      double profile_export_ms = std::chrono::duration<double, std::milli>(t1_export - t0_export).count();
+      std::cout << "profile_export_ms=" << profile_export_ms << "\n";
     }
 
     if (viewer) {
