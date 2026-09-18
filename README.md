@@ -242,6 +242,22 @@ El costo dominante de GridIndex::nearest proviene de este bucle de comparación 
 
 ## Ejercicio D — perfilado mediante instrumentación manual
 
+### Entorno de ejecución — Ejercicio D
+
+Las mediciones correspondientes al Ejercicio D se realizaron en un equipo distinto al utilizado en los Ejercicios A, B y C. Todas las repeticiones de la instrumentación manual se ejecutaron bajo el siguiente entorno:
+
+| Componente | Detalle |
+|---|---|
+| Sistema operativo | Ubuntu 24.04.5 LTS |
+| Kernel | Linux 7.0.0-31-generic |
+| CPU | Intel Core i7-8550U @ 1.80 GHz |
+| Núcleos / hilos | 4 núcleos / 8 hilos |
+| Memoria RAM | 7.6 GiB |
+| GPU integrada | Intel UHD Graphics 620 |
+| GPU dedicada | AMD Radeon 520/610 Mobile |
+| Compilador | g++ 13.3.0 |
+| Almacenamiento | GIGABYTE GP-GSTFS31240GNTD, 223.6 GiB SSD |
+
 Instrumentación agregada con `std::chrono` en al menos 5 regiones del programa
 (generación del perfil, deformación/ruido, construcción de `GridIndex`, búsqueda
 de vecinos, estimación de transformación, métricas de comparación, exportación,
@@ -255,8 +271,144 @@ double ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
 std::cout << "region_x_ms=" << ms << "\n";
 ```
 
-Ejecución con salida en CSV (`region,iteration,milliseconds`), repitiendo varias
-corridas para promediar y reducir ruido de medición.
+Las mediciones se imprimieron en la salida estándar y se almacenaron en archivos
+`.txt`. Se realizaron cuatro corridas para cada modo de ejecución con el fin de
+calcular promedios y reducir el efecto del ruido en las mediciones.
+
+### Resultados de la instrumentación manual
+
+Para reducir la influencia del ruido en las mediciones se realizaron cuatro repeticiones para cada modo de ejecución: ejecución normal, `--export` y `--viewer`.
+
+Las regiones medidas una vez por ejecución contienen 4 muestras por modo. Las regiones ejecutadas dentro del ciclo ICP contienen 45 iteraciones por ejecución, para un total de 180 muestras por modo. En el caso del visor GStreamer se midieron 29 cuadros por ejecución, para un total de 116 muestras.
+
+| Región medida | Normal (ms) | `--export` (ms) | `--viewer` (ms) |
+|---|---:|---:|---:|
+| `target_generation_ms` | 14.858 | 15.519 | 16.054 |
+| `source_generation_ms` | 28.102 | 28.524 | 32.500 |
+| `grid_index_ms` | 4.465 | 4.876 | 5.052 |
+| `initial_metrics_ms` | 956.763 | 946.726 | 1064.274 |
+| `nearest_neighbors_ms` | 336.374 | 331.812 | 335.264 |
+| `estimate_transform_ms` | 0.937 | 0.986 | 0.934 |
+| `profile_metrics_ms` | 674.546 | 667.379 | 671.564 |
+| `profile_export_ms` | — | 7209.247 | — |
+| `gstreamer_ms` | — | — | 39.982 |
+
+Los valores mostrados corresponden al tiempo promedio por medición de cada
+región y no al tiempo acumulado total de la región durante una ejecución completa.
+
+Los promedios presentados en esta sección fueron calculados con asistencia de una herramienta de inteligencia artificial a partir de los 12 archivos de mediciones obtenidos experimentalmente. La herramienta se utilizó únicamente para procesar y resumir los datos registrados, sin generar ni estimar valores faltantes.
+
+### Preguntas del enunciado
+
+#### ¿La región con mayor tiempo coincide con el hotspot de perf, Google Performance Tools y Valgrind?
+
+Sí. Aunque las mediciones del Ejercicio D se realizaron en un equipo diferente
+al utilizado en los Ejercicios A, B y C, los resultados muestran el mismo patrón
+general de comportamiento.
+
+En `perf report`, `GridIndex::nearest` representa el 97.25% del costo sin
+`--export` y el 88.62% con `--export`. Google Performance Tools reporta
+94.4% de costo propio y 97.7% acumulativo sin exportación, mientras que
+Valgrind Callgrind atribuye aproximadamente 98.2% del costo a esta misma región
+y a funciones STL asociadas.
+
+La instrumentación manual muestra el mismo comportamiento desde otra perspectiva.
+En ejecución normal, `nearest_neighbors_ms` presenta un promedio de
+336.374 ms por iteración, mientras que `profile_metrics_ms` alcanza
+674.546 ms por iteración.
+
+El valor mayor de `profile_metrics_ms` no contradice los resultados de las otras
+herramientas, ya que `compare_profiles` realiza internamente nuevas búsquedas de
+vecinos mediante estructuras `GridIndex`. Por lo tanto, una parte importante
+del tiempo medido dentro de esta región también corresponde a búsquedas de
+vecinos más cercanos.
+
+Consecuentemente, tanto la instrumentación manual como `perf`, Google
+Performance Tools y Valgrind coinciden en que la búsqueda de vecinos mediante
+`GridIndex::nearest` constituye el principal hotspot del programa.
+La diferencia de equipos impide comparar directamente los tiempos absolutos,
+pero no impide comparar la región dominante identificada por cada método.
+
+#### ¿Cuánto overhead introduce su instrumentación?
+
+Para estimar el overhead introducido por la instrumentación se comparó el tiempo
+total de ejecución de la versión original del programa con la versión
+instrumentada. Ambas versiones fueron compiladas con las mismas opciones y
+ejecutadas en el mismo equipo, utilizando cuatro repeticiones en ejecución normal.
+
+| Versión | Tiempo promedio |
+|---|---:|
+| Original | 45.9625 s |
+| Instrumentada | 45.7275 s |
+
+El overhead se calculó mediante:
+
+`((T_instrumentada - T_original) / T_original) * 100`
+
+obteniéndose un valor de aproximadamente `-0.51%`.
+
+La versión instrumentada presentó un tiempo promedio 0.235 s menor que la versión
+original, equivalente a una diferencia relativa de aproximadamente `-0.51%`,
+valor pequeño frente a la variación observada entre las distintas corridas.
+Por lo tanto, el overhead introducido por la instrumentación puede considerarse
+despreciable dentro del ruido experimental de estas mediciones.
+
+#### ¿Qué partes del programa son más fáciles de entender con instrumentación manual que con muestreo?
+
+La instrumentación manual permite medir directamente regiones específicas del
+algoritmo y asociar cada medición con una etapa concreta de la ejecución.
+
+Por ejemplo, fue posible medir por separado la generación del perfil objetivo,
+la transformación, deformación y ruido del perfil fuente, la construcción del
+`GridIndex`, la búsqueda de vecinos, la estimación de la transformación rígida,
+el cálculo de métricas, la exportación y el renderizado mediante GStreamer.
+
+Además, las regiones ejecutadas dentro del ICP pueden relacionarse directamente
+con cada iteración, y las mediciones del visor con cada cuadro renderizado.
+Esto facilita observar cómo se comporta una etapa específica durante la
+ejecución.
+
+#### ¿Qué información no puede obtener con instrumentación manual?
+
+La instrumentación manual solamente proporciona información sobre las regiones
+que fueron seleccionadas previamente para ser medidas. Si existe un hotspot en
+una parte no instrumentada del programa, este puede pasar desapercibido.
+
+Tampoco permite obtener directamente información de bajo nivel como número de
+instrucciones ejecutadas, ciclos de CPU, fallos de caché, branches,
+branch-misses o el costo de instrucciones individuales.
+
+Por ejemplo, `perf stat` permitió obtener contadores de hardware, mientras que
+`perf annotate` permitió localizar instrucciones específicas dentro de
+`GridIndex::nearest`, incluyendo operaciones como `subsd`, `mulsd`, `comisd`
+y saltos condicionales dentro del bucle interno de búsqueda.
+
+Por esta razón, la instrumentación manual resulta útil para estudiar regiones
+lógicas previamente conocidas, mientras que herramientas como `perf`,
+Google Performance Tools y Valgrind son más adecuadas para descubrir hotspots
+y analizar su comportamiento a nivel de función o instrucción.
+
+### Conclusión
+
+La instrumentación manual permitió medir de forma directa el costo de regiones
+concretas del programa y relacionar los tiempos obtenidos con etapas específicas
+del algoritmo ICP. Los resultados coinciden con el perfilado realizado mediante
+`perf`, Google Performance Tools y Valgrind, ya que las regiones que involucran
+búsquedas de vecinos presentan el mayor costo computacional.
+
+Para localizar hotspots de forma global resultaron más apropiadas las herramientas
+de perfilado, mientras que la instrumentación manual fue especialmente útil para
+medir regiones lógicas, iteraciones y operaciones específicas como la exportación
+o el renderizado. Por otra parte, `perf annotate` y la revisión de ensamblador
+permitieron profundizar hasta el nivel de instrucciones.
+
+En conjunto, los resultados indican que `GridIndex::nearest` y las búsquedas de
+vecinos constituyen el principal punto de interés para futuras optimizaciones del
+programa. El overhead de la instrumentación no pudo distinguirse de forma
+significativa del ruido experimental en las mediciones realizadas.
+
+Los resultados completos utilizados para calcular los promedios y el overhead
+se encuentran almacenados en la carpeta `mediciones/` del repositorio.
 
 ## Ejercicio E — propuesta de optimización
 
