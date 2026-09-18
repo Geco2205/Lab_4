@@ -4,7 +4,7 @@
 
 ## Preparación del entorno
 
-\`\`\`bash
+```bash
 g++ --version
 
 ### Si no existe:
@@ -23,11 +23,11 @@ sudo apt install libgstreamer1.0-dev \
 ### Si perf no corre, verificar versión de kernel
 uname -r
 perf --version
-\`\`\`
+```
 
 ### Compilación y ejecución base
 
-\`\`\`bash
+```bash
 cd point-cloud-collimation
 make clean
 make
@@ -35,19 +35,19 @@ make
 ./point_cloud_collimation
 ./point_cloud_collimation --export
 ./point_cloud_collimation --viewer   # requiere entorno gráfico
-\`\`\`
+```
 
 ## Ejercicio A — comprensión del programa base
 
-\`\`\`bash
+```bash
 ./point_cloud_collimation --export
-\`\`\`
+```
 
 Archivos revisados en `reconstruction/`: `target_profile.csv`, `source_initial_profile.csv`, `source_final_profile.csv`, `source_motion.csv`, `profile_metrics.csv`, `frame_*.ppm`.
 
 ## Ejercicio B — perfilado con herramientas
 
-\`\`\`bash
+```bash
 ### perf stat: eventos generales
 perf stat ./point_cloud_collimation
 perf stat ./point_cloud_collimation --export
@@ -77,11 +77,11 @@ google-pprof --text ./point_cloud_collimation point_cloud.prof
 ### Si ldd no muestra libprofiler o no se genera el .prof:
 LD_PRELOAD=/lib/x86_64-linux-gnu/libprofiler.so \
     CPUPROFILE=point_cloud.prof ./point_cloud_collimation
-\`\`\`
+```
 
 ## Ejercicio C — perfilado mediante revisión de ensamblador
 
-\`\`\`bash
+```bash
 ### Compilar conservando información de depuración
 make clean
 make CXXFLAGS="-std=c++17 -O2 -g -Wall -Wextra -pedantic \
@@ -99,7 +99,7 @@ objdump -drwC -Mintel ./point_cloud_collimation \
 ### Conectar muestras de perf con el ensamblador
 perf record -g ./point_cloud_collimation
 perf annotate
-\`\`\`
+```
 
 ## Ejercicio D — perfilado mediante instrumentación manual
 
@@ -108,13 +108,13 @@ Instrumentación agregada con `std::chrono` en al menos 5 regiones del programa
 de vecinos, estimación de transformación, métricas de comparación, exportación,
 renderizado):
 
-\`\`\`cpp
+```cpp
 auto t0 = std::chrono::steady_clock::now();
 /* región medida */
 auto t1 = std::chrono::steady_clock::now();
 double ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
 std::cout << "region_x_ms=" << ms << "\n";
-\`\`\`
+```
 
 Ejecución con salida en CSV (`region,iteration,milliseconds`), repitiendo varias
 corridas para promediar y reducir ruido de medición.
@@ -123,17 +123,17 @@ corridas para promediar y reducir ruido de medición.
 
 **Cambio 1 — `cell_size` (90 → 120):**
 
-\`\`\`bash
+```bash
 perf stat ./point_cloud_collimation
 perf stat ./point_cloud_collimation --export
-\`\`\`
+```
 
 **Cambio 2 — criterio de convergencia (`VARIATION` 0.1% → 0.5%):**
 
-\`\`\`bash
+```bash
 perf stat ./point_cloud_collimation
 perf stat ./point_cloud_collimation --export
-\`\`\`
+```
 
 
 
