@@ -121,18 +121,24 @@ corridas para promediar y reducir ruido de medición.
 
 ## Ejercicio E — propuesta de optimización
 
-**Cambio 1 — `cell_size` (90 → 120):**
+Cambio 1 — `cell_size` (90 → 120):
 
 ```bash
 perf stat ./point_cloud_collimation
 perf stat ./point_cloud_collimation --export
+ 
+valgrind --tool=callgrind ./point_cloud_collimation
+callgrind_annotate callgrind.out.* | less
 ```
 
-**Cambio 2 — criterio de convergencia (`VARIATION` 0.1% → 0.5%):**
+Cambio 2 — criterio de convergencia (`VARIATION` 0.1% → 0.5%):
 
 ```bash
 perf stat ./point_cloud_collimation
 perf stat ./point_cloud_collimation --export
+ 
+valgrind --tool=callgrind ./point_cloud_collimation
+callgrind_annotate callgrind.out.* | less
 ```
 
 
@@ -179,6 +185,26 @@ Finished after 45 iterations with profile_score=0.01847086
 | branches | 27,275,328,136 | 33,627,719,411 |
 | branch-misses | 486,398,735 (1.78%) | 508,427,796 (1.51%) |
 | tiempo | 16.137382552 s | 17.858444185 s |
+
+Validación cruzada con Callgrind (sin `--export`):
+
+| Herramienta | Instrucciones totales |
+|---|---|
+| `perf stat` (`cpu_core/instructions`) | 207,001,003,220 |
+| `valgrind --tool=callgrind` (`Ir`) | 207,131,928,312 |
+| Diferencia | 130,925,092 (~0.06%) |
+
+Desglose por función (`callgrind_annotate`), `cell_size=90`:
+
+| Función / archivo | Ir | % |
+|---|---|---|
+| `GridIndex::nearest`  | 168,371,113,599 | 81.29% |
+| `stl_vector.h` | 20,911,706,440 | 10.10% |
+| `hashtable.h`  | 5,770,394,139 | 2.79% |
+| `hashtable_policy.h` | 4,139,601,854 | 2.00% |
+| `stl_algobase.h` | 3,680,330,298 | 1.78% |
+| `stl_function.h` | 926,270,844 | 0.45% |
+
  
 ### Evidencia después (`cell_size=120`)
  
@@ -193,9 +219,30 @@ Finished after 45 iterations with profile_score=0.01847086
 | branches | 34,334,838,043 | 40,691,621,133 |
 | branch-misses | 424,884,865 (1.24%) | 446,568,959 (1.10%) |
 | tiempo | 19.151438072 s | 21.006509671 s |
+
+Validación cruzada con Callgrind (sin `--export`):
+
+| Herramienta | Instrucciones totales |
+|---|---|
+| `perf stat` (`cpu_core/instructions`) | 268,311,321,121 |
+| `valgrind --tool=callgrind` (`Ir`) | 268,425,428,727 |
+| Diferencia | 114,107,606 (~0.04%) |
+
+Desglose por función (`callgrind_annotate`), `cell_size=120`:
+
+| Función / archivo | Ir | % |
+|---|---|---|
+| `GridIndex::nearest` | 224,614,461,128 | 83.68% |
+| `stl_vector.h`  | 30,268,009,610 | 11.28% |
+| `hashtable.h`  | 4,345,887,247 | 1.62% |
+| `hashtable_policy.h` | 3,167,374,100 | 1.18% |
+| `stl_algobase.h` | 1,951,996,404 | 0.73% |
+| `stl_function.h` | 837,029,019 | 0.31% |
+
+Comparando ambos desgloses: al subir `cell_size` de 90 a 120, la parte de instrucciones en `stl_vector.h` sube de 10.10% a 11.28%, mientras que la porción en `hashtable.h`/`hashtable_policy.h` si una  baja de 4.79% a 2.80%. Esto confirma que si es cierto que hay menos celdas que buscar, pero estas son más grandes por ende, más caras de revisar, aumentando el número de instrucciones
  
 Mi hipótesis fue totalmente incorrecta. La justificación es la siguiente: es posible observar que, tanto usando export como sin usarlo, la duración total aumentó unos 3 segundos en ambos casos, junto con un incremento en las instrucciones ejecutadas por los núcleos de rendimiento, así también con los ciclos y los branches. Esto se debe a que, al aumentar el tamaño de la celda, cada celda contiene una mayor cantidad de puntos, y la búsqueda del vecino más cercano debe comparar la distancia contra todos los puntos dentro de la celda visitada. Es decir, aunque se reduce la cantidad de celdas y por lo tanto el radio de celdas que se debe revisar, el costo de revisar cada celda individual crece más de lo que se ahorra en disminuyendo el radio máximo, lo que termina agregando una mayor cantidad de instrucciones y ciclos, aumentando el tiempo de ejecución en vez de reducirlo.
- 
+
 ---
  
 ## Cambio número 2. Modificación del criterio de convergencia de 0.1% a 0.5%
@@ -215,8 +262,31 @@ Finished after 36 iterations with profile_score=0.01858543
 | branches | 21,479,361,674 | 26,742,059,408 |
 | branch-misses | 431,426,766 (2.01%) | 450,452,104 (1.68%) |
 | tiempo | 13.161231565 s | 14.752698873 s |
+
+Validación cruzada con Callgrind (sin `--export`):
+
+| Herramienta | Instrucciones totales |
+|---|---|
+| `perf stat` (`cpu_core/instructions`) | 161,060,380,467 |
+| `valgrind --tool=callgrind` (`Ir`) | 161,160,582,632 |
+| Diferencia | 100,202,165 (~0.06%) |
+
+esglose por función (`callgrind_annotate`), `VARIATION=0.5%`:
+
+| Función / archivo | Ir | % |
+|---|---|---|
+| `GridIndex::nearest` | 129,328,324,585 | 80.25% |
+| `stl_vector.h` | 15,509,107,218 | 9.62% |
+| `hashtable.h` | 5,368,148,155 | 3.33% |
+| `hashtable_policy.h` | 3,857,337,166 | 2.39% |
+| `stl_algobase.h` | 3,510,520,630 | 2.18% |
+| `stl_function.h` | 847,015,539 | 0.53% |
+
+
  
 La hipótesis fue correcta, en este caso sí se cumplió el bajón de la duración siendo de 3 segundos menos para con y sin export, esto se debe a principalmente a lo mencionado, como se realizaron 9 iteraciones menos, eso es una disminución en las instrucciones, ciclos, branches que conllevaban al cálculo de la transformada, como el criterio de convergencia es menos exigente, eso permite que se llegue a cumplir tanto el profile_score como también en transform_step de una forma más rápida, como contraparte, la precisión se vio afectada, tanto el ángulo que terminó con un grado de diferencia, la traslación en X hubo 90 unidades de diferencia pero en la traslación en Y hubo una diferencia grande de unas 700 unidades, todo esto comparándolo a la precisión que tiene con 0.1% de criterio de convergencia donde el resultado es muy cercano a lo esperado. Hay que valorar si para el sistema en que se está utilizando el mecanismo ICP afecta mucho esa diferencia de precisión y podría terminar afectando su funcionamiento.
+
+Al igual que en el Cambio 1, `perf` y Callgrind coinciden con una diferencia muy baja en el total de instrucciones.
 
 
 
