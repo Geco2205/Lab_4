@@ -1,0 +1,211 @@
+         : 0    0xc8a0 <GridIndex::nearest(Point const&, Point&, double&) const>:
+    0.00 :   c8a0:        endbr64
+    0.00 :   c8a4:        pushq   %r15
+    0.01 :   c8a6:        movq    0x31f2(%rip), %xmm1  # 0xfaa0
+    0.01 :   c8ae:        movq    %rdi, %r15
+    0.00 :   c8b1:        movq    %rdx, %r10
+    0.00 :   c8b4:        pushq   %r14
+    0.01 :   c8b6:        movsd   0x30aa(%rip), %xmm5  # 0xf968
+    0.01 :   c8be:        movq    %rcx, %r14
+    0.00 :   c8c1:        pushq   %r13
+    0.00 :   c8c3:        pushq   %r12
+    0.00 :   c8c5:        pushq   %rbp
+    0.01 :   c8c6:        pushq   %rbx
+    0.00 :   c8c7:        movsd   0x8(%rdi), %xmm6
+    0.00 :   c8cc:        movq    %rsi, %rbx
+    0.02 :   c8cf:        movsd   (%rsi), %xmm0
+    0.01 :   c8d3:        divsd   %xmm6, %xmm0
+    0.00 :   c8d7:        movapd  %xmm0, %xmm2
+    0.01 :   c8db:        andpd   %xmm1, %xmm2
+    0.00 :   c8df:        ucomisd %xmm2, %xmm5
+    0.02 :   c8e3:        jbe     0xc91c <GridIndex::nearest(Point const&, Point&, double&) const+0x7c>
+    0.00 :   c8e5:        cvttsd2si       %xmm0, %rax
+    0.00 :   c8ea:        pxor    %xmm2, %xmm2
+    0.02 :   c8ee:        movsd   0x305a(%rip), %xmm7  # 0xf950
+    0.00 :   c8f6:        movapd  %xmm1, %xmm3
+    0.00 :   c8fa:        andnpd  %xmm0, %xmm3
+    0.02 :   c8fe:        cvtsi2sd        %rax, %xmm2
+    0.00 :   c903:        movapd  %xmm2, %xmm4
+    0.02 :   c907:        cmpnlesd        %xmm0, %xmm4
+    0.02 :   c90c:        andpd   %xmm7, %xmm4
+    0.03 :   c910:        subsd   %xmm4, %xmm2
+    0.02 :   c914:        orpd    %xmm3, %xmm2
+    0.00 :   c918:        movapd  %xmm2, %xmm0
+    0.04 :   c91c:        cvttsd2si       %xmm0, %eax
+    0.00 :   c920:        movsd   0x8(%rbx), %xmm0
+    0.00 :   c925:        divsd   %xmm6, %xmm0
+    0.02 :   c929:        movl    %eax, -0x2c(%rsp)
+    0.00 :   c92d:        movapd  %xmm0, %xmm2
+    0.00 :   c931:        andpd   %xmm1, %xmm2
+    0.00 :   c935:        ucomisd %xmm2, %xmm5
+    0.01 :   c939:        jbe     0xc96e <GridIndex::nearest(Point const&, Point&, double&) const+0xce>
+    0.00 :   c93b:        cvttsd2si       %xmm0, %rax
+    0.00 :   c940:        pxor    %xmm2, %xmm2
+    0.02 :   c944:        movsd   0x3004(%rip), %xmm4  # 0xf950
+    0.00 :   c94c:        andnpd  %xmm0, %xmm1
+    0.00 :   c950:        cvtsi2sd        %rax, %xmm2
+    0.02 :   c955:        movapd  %xmm2, %xmm3
+    0.00 :   c959:        cmpnlesd        %xmm0, %xmm3
+    0.00 :   c95e:        andpd   %xmm4, %xmm3
+    0.00 :   c962:        subsd   %xmm3, %xmm2
+    0.01 :   c966:        orpd    %xmm1, %xmm2
+    0.00 :   c96a:        movapd  %xmm2, %xmm0
+    0.00 :   c96e:        movq    0x2ffb(%rip), %rax  # 0xf970
+    0.02 :   c975:        cvttsd2si       %xmm0, %ecx
+    0.00 :   c979:        xorl    %r13d, %r13d
+    0.00 :   c97c:        xorl    %ebp, %ebp
+    0.00 :   c97e:        movq    %rbx, %rdi
+    0.01 :   c981:        movl    $0x1, %r12d
+    0.00 :   c987:        movq    %r10, %rbx
+    0.00 :   c98a:        movl    %r13d, %r10d
+    0.00 :   c98d:        movq    %rax, (%r14)
+    0.01 :   c990:        movl    %r10d, %esi
+    0.00 :   c993:        movl    %ecx, %r11d
+    0.00 :   c996:        movq    %rbx, %rax
+    0.03 :   c999:        negl    %esi
+    0.01 :   c99b:        subl    %r10d, %r11d
+    0.02 :   c99e:        movl    %esi, -0xc(%rsp)
+    0.00 :   c9a2:        movl    %esi, %r9d
+    0.02 :   c9a5:        movl    %r11d, %ebx
+    0.01 :   c9a8:        movl    %ecx, %esi
+    0.00 :   c9aa:        movl    %ebp, %r11d
+    0.00 :   c9ad:        movq    %rax, %rbp
+    0.03 :   c9b0:        movl    %r9d, %r8d
+    0.01 :   c9b3:        movl    %ebx, %eax
+    0.03 :   c9b5:        movl    %ebx, -0x18(%rsp)
+    0.13 :   c9b9:        movl    -0xc(%rsp), %ecx
+    0.02 :   c9bd:        negl    %r8d
+    0.03 :   c9c0:        movq    %rax, -0x38(%rsp)
+    0.00 :   c9c5:        movl    %esi, %ebx
+    0.14 :   c9c7:        movl    %r9d, -0x14(%rsp)
+    0.02 :   c9cc:        cmovsl  %r9d, %r8d
+    0.19 :   c9d0:        jmp     0xc9e4 <GridIndex::nearest(Point const&, Point&, double&) const+0x144>
+    0.00 :   c9d2:        nopw    (%rax,%rax)
+    0.36 :   c9d8:        addl    $0x1, %ecx
+    0.09 :   c9db:        cmpl    %r12d, %ecx
+    0.16 :   c9de:        je      0xcaa8 <GridIndex::nearest(Point const&, Point&, double&) const+0x208>
+    0.02 :   c9e4:        movl    %ecx, %eax
+    1.32 :   c9e6:        negl    %eax
+    0.03 :   c9e8:        cmovsl  %ecx, %eax
+    0.34 :   c9eb:        cmpl    %r8d, %eax
+    0.07 :   c9ee:        cmovll  %r8d, %eax
+    0.35 :   c9f2:        cmpl    %r10d, %eax
+    1.10 :   c9f5:        jne     0xc9d8 <GridIndex::nearest(Point const&, Point&, double&) const+0x138>
+    0.14 :   c9f7:        movl    -0x2c(%rsp), %eax
+    0.24 :   c9fb:        leal    (%rcx,%rax), %esi
+    0.00 :   c9fe:        movq    -0x38(%rsp), %rax
+    0.35 :   ca03:        shlq    $0x20, %rsi
+    0.02 :   ca07:        xorq    %rax, %rsi
+    0.22 :   ca0a:        cmpq    $0x0, 0x28(%r15)
+    0.58 :   ca0f:        jne     0xcb18 <GridIndex::nearest(Point const&, Point&, double&) const+0x278>
+    0.00 :   ca15:        movq    0x20(%r15), %rax
+    0.00 :   ca19:        testq   %rax, %rax
+    0.00 :   ca1c:        jne     0xca28 <GridIndex::nearest(Point const&, Point&, double&) const+0x188>
+    0.00 :   ca1e:        jmp     0xc9d8 <GridIndex::nearest(Point const&, Point&, double&) const+0x138>
+    0.00 :   ca20:        movq    (%rax), %rax
+    0.00 :   ca23:        testq   %rax, %rax
+    0.00 :   ca26:        je      0xc9d8 <GridIndex::nearest(Point const&, Point&, double&) const+0x138>
+    0.00 :   ca28:        cmpq    0x8(%rax), %rsi
+    0.00 :   ca2c:        jne     0xca20 <GridIndex::nearest(Point const&, Point&, double&) const+0x180>
+    0.26 :   ca2e:        movq    0x10(%rax), %rdx
+    0.20 :   ca32:        movq    0x18(%rax), %rsi
+    0.07 :   ca36:        cmpq    %rdx, %rsi
+    0.00 :   ca39:        je      0xc9d8 <GridIndex::nearest(Point const&, Point&, double&) const+0x138>
+    0.02 :   ca3b:        movq    (%r15), %rax
+    0.02 :   ca3e:        movq    (%rax), %r9
+    0.00 :   ca41:        nopl    (%rax)
+    3.47 :   ca48:        movslq  (%rdx), %rax
+    0.01 :   ca4b:        movsd   (%rdi), %xmm0
+    0.00 :   ca4f:        movsd   0x8(%rdi), %xmm1
+    8.76 :   ca54:        shlq    $0x4, %rax
+    0.11 :   ca58:        addq    %r9, %rax
+   15.69 :   ca5b:        subsd   (%rax), %xmm0
+    1.61 :   ca5f:        subsd   0x8(%rax), %xmm1
+    9.93 :   ca64:        mulsd   %xmm0, %xmm0
+    1.53 :   ca68:        mulsd   %xmm1, %xmm1
+    4.68 :   ca6c:        addsd   %xmm1, %xmm0
+    0.01 :   ca70:        movsd   (%r14), %xmm1
+   10.13 :   ca75:        comisd  %xmm0, %xmm1
+    8.88 :   ca79:        jbe     0xca8e <GridIndex::nearest(Point const&, Point&, double&) const+0x1ee>
+    0.82 :   ca7b:        movsd   %xmm0, (%r14)
+    0.07 :   ca80:        movdqu  (%rax), %xmm7
+    0.01 :   ca84:        movl    $0x1, %r11d
+    0.12 :   ca8a:        movups  %xmm7, (%rbp)
+    0.13 :   ca8e:        addq    $0x4, %rdx
+    0.00 :   ca92:        cmpq    %rdx, %rsi
+    8.82 :   ca95:        jne     0xca48 <GridIndex::nearest(Point const&, Point&, double&) const+0x1a8>
+    0.01 :   ca97:        addl    $0x1, %ecx
+    0.04 :   ca9a:        cmpl    %r12d, %ecx
+    0.06 :   ca9d:        jne     0xc9e4 <GridIndex::nearest(Point const&, Point&, double&) const+0x144>
+    0.00 :   caa3:        nopl    (%rax,%rax)
+    0.07 :   caa8:        movl    -0x14(%rsp), %r9d
+    0.00 :   caad:        movl    %ebx, %esi
+    0.03 :   caaf:        movl    -0x18(%rsp), %ebx
+    0.15 :   cab3:        addl    $0x1, %r9d
+    0.00 :   cab7:        addl    $0x1, %ebx
+    0.02 :   caba:        cmpl    %r12d, %r9d
+    0.14 :   cabd:        jne     0xc9b0 <GridIndex::nearest(Point const&, Point&, double&) const+0x110>
+    0.02 :   cac3:        movq    %rbp, %rbx
+    0.02 :   cac6:        movl    %esi, %ecx
+    0.00 :   cac8:        movl    %r11d, %ebp
+    0.01 :   cacb:        testb   %r11b, %r11b
+    0.02 :   cace:        je      0xcaf2 <GridIndex::nearest(Point const&, Point&, double&) const+0x252>
+    0.01 :   cad0:        movsd   0x8(%r15), %xmm0
+    0.00 :   cad6:        pxor    %xmm1, %xmm1
+    0.02 :   cada:        cvtsi2sd        %r10d, %xmm1
+    0.01 :   cadf:        mulsd   %xmm0, %xmm0
+    0.01 :   cae3:        mulsd   %xmm1, %xmm0
+    0.01 :   cae7:        mulsd   %xmm1, %xmm0
+    0.03 :   caeb:        comisd  (%r14), %xmm0
+    0.02 :   caf0:        ja      0xcb04 <GridIndex::nearest(Point const&, Point&, double&) const+0x264>
+    0.01 :   caf2:        addl    $0x1, %r10d
+    0.00 :   caf6:        addl    $0x1, %r12d
+    0.00 :   cafa:        cmpl    $0x11, %r10d
+    0.03 :   cafe:        jne     0xc990 <GridIndex::nearest(Point const&, Point&, double&) const+0xf0>
+    0.01 :   cb04:        popq    %rbx
+    0.00 :   cb05:        movl    %ebp, %eax
+    0.00 :   cb07:        popq    %rbp
+    0.01 :   cb08:        popq    %r12
+    0.01 :   cb0a:        popq    %r13
+    0.00 :   cb0c:        popq    %r14
+    0.00 :   cb0e:        popq    %r15
+    0.02 :   cb10:        retq
+    0.00 :   cb11:        nopl    (%rax)
+    0.01 :   cb18:        movq    0x18(%r15), %r9
+    0.00 :   cb1c:        movq    %rsi, %rax
+    0.00 :   cb1f:        xorl    %edx, %edx
+    1.59 :   cb21:        divq    %r9
+    0.49 :   cb24:        movq    0x10(%r15), %rax
+    0.00 :   cb28:        movq    %r9, -0x28(%rsp)
+    1.71 :   cb2d:        movq    (%rax,%rdx,8), %r13
+    0.00 :   cb31:        movq    %rdx, -0x20(%rsp)
+    0.32 :   cb36:        testq   %r13, %r13
+    0.34 :   cb39:        je      0xc9d8 <GridIndex::nearest(Point const&, Point&, double&) const+0x138>
+    2.96 :   cb3f:        movq    (%r13), %rax
+    0.01 :   cb43:        movl    %r12d, -0x10(%rsp)
+    3.44 :   cb48:        movq    0x8(%rax), %r9
+    0.22 :   cb4c:        cmpq    %r9, %rsi
+    0.10 :   cb4f:        je      0xcb7a <GridIndex::nearest(Point const&, Point&, double&) const+0x2da>
+    0.44 :   cb51:        movq    (%rax), %r12
+    0.09 :   cb54:        testq   %r12, %r12
+    0.00 :   cb57:        je      0xcb98 <GridIndex::nearest(Point const&, Point&, double&) const+0x2f8>
+    2.03 :   cb59:        movq    0x8(%r12), %r9
+    0.09 :   cb5e:        movq    %rax, %r13
+    0.00 :   cb61:        xorl    %edx, %edx
+    0.11 :   cb63:        movq    %r9, %rax
+    2.48 :   cb66:        divq    -0x28(%rsp)
+    0.04 :   cb6b:        cmpq    %rdx, -0x20(%rsp)
+    0.18 :   cb70:        jne     0xcb98 <GridIndex::nearest(Point const&, Point&, double&) const+0x2f8>
+    0.12 :   cb72:        movq    %r12, %rax
+    0.01 :   cb75:        cmpq    %r9, %rsi
+    0.01 :   cb78:        jne     0xcb51 <GridIndex::nearest(Point const&, Point&, double&) const+0x2b1>
+    0.23 :   cb7a:        movq    (%r13), %rax
+    0.01 :   cb7e:        movl    -0x10(%rsp), %r12d
+    0.00 :   cb83:        testq   %rax, %rax
+    0.09 :   cb86:        jne     0xca2e <GridIndex::nearest(Point const&, Point&, double&) const+0x18e>
+    0.00 :   cb8c:        jmp     0xc9d8 <GridIndex::nearest(Point const&, Point&, double&) const+0x138>
+    0.00 :   cb91:        nopl    (%rax)
+    0.06 :   cb98:        movl    -0x10(%rsp), %r12d
+    0.19 :   cb9d:        jmp     0xc9d8 <GridIndex::nearest(Point const&, Point&, double&) const+0x138>
+ Percent |	Source code & Disassembly of point_cloud_collimation for cpu/cycles/P (789 samples, percent: local period)
+--------------------------------------------------------------------------------------------------------------------------
