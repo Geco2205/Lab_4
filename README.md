@@ -437,11 +437,13 @@ Se hace uso de herramientas de IA como apoyo para comprender conceptos, generar 
 
 Se adjuntan los enlaces compartidos de las conversaciones como evidencia.
 
-https://claude.ai/share/4789289c-86c7-4bba-838a-ca3628b3ef7b
+Gerson: https://claude.ai/share/4789289c-86c7-4bba-838a-ca3628b3ef7b
 
-https://chatgpt.com/share/6aad6aff-5c2c-83e8-835d-f05c4bab4bec
+Nicole: https://chatgpt.com/share/6aad6aff-5c2c-83e8-835d-f05c4bab4bec
 
-https://chatgpt.com/share/6aad704e-55e8-83e8-b9dd-5a009b43692d
+Keilin: https://chatgpt.com/share/6aad704e-55e8-83e8-b9dd-5a009b43692d
+
+Gonzalo: https://chatgpt.com/share/6aad727f-1db8-83e8-94b1-f0d1c4db6d14
 
 ## Profesor
 
