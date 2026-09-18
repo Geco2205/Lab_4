@@ -281,9 +281,6 @@ callgrind_annotate callgrind.out.* | less
 ```
 
 
-
-## Ejercicio E — Propuesta de Optimización (`point_cloud_collimation`)
-
 ### Computadora usada para esta parte
 
 | Componente | Detalle |
@@ -299,8 +296,7 @@ callgrind_annotate callgrind.out.* | less
 --
 
 Se descartan los valores de `cpu_atom` en todas las tablas: su cobertura fue
-menor al 0.04% en todas las corridas (ver paréntesis en la salida cruda de `perf`), es
-decir, son ruido de medición y no una carga de trabajo real. Solo se usa
+menor al 0.04% en todas las corridas, es decir, son ruido de medición y no una carga de trabajo real. Solo se usa
 `cpu_core`, con cobertura de 99.9-100% en todas las corridas.
  
 ---
@@ -322,7 +318,7 @@ Finished after 45 iterations with profile_score=0.01847086
 | instructions | 207,001,003,220 | 239,518,364,405 |
 | cycles | 86,236,126,691 | 95,066,306,848 |
 | branches | 27,275,328,136 | 33,627,719,411 |
-| branch-misses | 486,398,735 (1.78%) | 508,427,796 (1.51%) |
+| branch-misses | 486,398,735 | 508,427,796 |
 | tiempo | 16.137382552 s | 17.858444185 s |
 
 Validación cruzada con Callgrind (sin `--export`):
@@ -331,7 +327,7 @@ Validación cruzada con Callgrind (sin `--export`):
 |---|---|
 | `perf stat` (`cpu_core/instructions`) | 207,001,003,220 |
 | `valgrind --tool=callgrind` (`Ir`) | 207,131,928,312 |
-| Diferencia | 130,925,092 (~0.06%) |
+
 
 Desglose por función (`callgrind_annotate`), `cell_size=90`:
 
@@ -365,7 +361,7 @@ Validación cruzada con Callgrind (sin `--export`):
 |---|---|
 | `perf stat` (`cpu_core/instructions`) | 268,311,321,121 |
 | `valgrind --tool=callgrind` (`Ir`) | 268,425,428,727 |
-| Diferencia | 114,107,606 (~0.04%) |
+
 
 Desglose por función (`callgrind_annotate`), `cell_size=120`:
 
@@ -408,7 +404,7 @@ Validación cruzada con Callgrind (sin `--export`):
 |---|---|
 | `perf stat` (`cpu_core/instructions`) | 161,060,380,467 |
 | `valgrind --tool=callgrind` (`Ir`) | 161,160,582,632 |
-| Diferencia | 100,202,165 (~0.06%) |
+
 
 esglose por función (`callgrind_annotate`), `VARIATION=0.5%`:
 
